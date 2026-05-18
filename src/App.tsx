@@ -116,22 +116,29 @@ const calculateNewtonianPath = (m: number, type: PotentialType, k: number = 1) =
       const v0 = (X_END - X_START - 0.5 * g * Math.pow(TIME_END, 2)) / TIME_END;
       x = X_START + v0 * t + 0.5 * g * t * t;
     } else if (type === 'harmonic') {
-      // Basic harmonic motion - simpler approximation for target path
+      // Basic harmonic motion - fit boundary conditions x(0)=X_START, x(T)=X_END
       const center = 30;
       const omega = Math.sqrt(k / m);
-      // We need to fit x(0)=X_START and x(T)=X_END
-      // x(t) = C + A cos(wt) + B sin(wt)
       const A = X_START - center;
-      const B = (X_END - center - A * Math.cos(omega * dtTotal)) / Math.sin(omega * dtTotal);
+      const sinTerm = Math.sin(omega * dtTotal);
+      
+      // Avoid division by zero if we hit a resonance/node
+      const B = Math.abs(sinTerm) > 1e-6 
+        ? (X_END - center - A * Math.cos(omega * dtTotal)) / sinTerm
+        : 0;
+        
       x = center + A * Math.cos(omega * t) + B * Math.sin(omega * t);
     }
+    
+    // Ensure x is a finite number to prevent D3/SVG crashes
+    if (!isFinite(x)) x = X_START + ((X_END - X_START) * t) / TIME_END;
     
     points.push({ t, x, id: `newt-${i}` });
   }
   return points;
 };
 
-/// --- Components ---
+// --- Components ---
 
 export default function App() {
   const [mass, setMass] = useState(1);
@@ -323,7 +330,7 @@ export default function App() {
                         cy={yScale(p.x)}
                         r={i === 0 || i === points.length - 1 ? 8 : 6}
                         fill={i === 0 || i === points.length - 1 ? '#1e293b' : '#6366f1'}
-                        className={`draggable-point transition-all duration-75 outline-none ${i === 0 || i === points.length - 1 ? 'cursor-not-allowed' : 'cursor-ns-resize hover:r-8'}`}
+                        className={`draggable-point transition-all duration-75 outline-none ${i === 0 || i === points.length - 1 ? 'cursor-not-allowed' : 'cursor-ns-resize hover:scale-125'}`}
                       />
                     ))}
                   </svg>
