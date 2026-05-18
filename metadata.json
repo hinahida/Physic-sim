@@ -1,0 +1,8 @@
+{
+  "name": "Least Action Principle Lab",
+  "description": "Interactive laboratory for exploring classical mechanics through the Principle of Least Action, as described in 'Simple derivation of Newtonian mechanics from the principle of least action' (Am. J. Phys. 71, 386–391).",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
